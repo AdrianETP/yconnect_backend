@@ -8,5 +8,5 @@ import (
 func setOrgRoutes(app *fiber.App) {
 	app.Post("/organizations", controllers.CreateOrganization)
     app.Get("/organizations" , controllers.GetAllOrgs)
-    app.Get("/organizations/search" , controllers.SearchOrg)
+    app.Get("/organizations/searchByTag" , controllers.GetOrgByTag)
 }

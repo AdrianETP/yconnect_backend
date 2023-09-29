@@ -27,7 +27,7 @@ func CreateOrganization(c *fiber.Ctx) error {
 	})
 }
 
-func SearchOrg(c *fiber.Ctx) error {
+func GetOrgByTag(c *fiber.Ctx) error {
 	var Tag models.TagType
 	c.BodyParser(&Tag)
 	tags := Tag.Tags
@@ -40,7 +40,7 @@ func SearchOrg(c *fiber.Ctx) error {
 		results, _ := orgCol.Find(context.TODO(), bson.D{
 			{"tags", bson.D{{"$elemMatch", bson.D{{"$eq", t}}}}},
 		})
-        var newOrgs []models.Organization
+		var newOrgs []models.Organization
 
 		for results.Next(context.TODO()) {
 			var organization models.Organization
@@ -48,7 +48,7 @@ func SearchOrg(c *fiber.Ctx) error {
 			organizations = append(newOrgs, organization)
 
 		}
-        organizations = append(organizations, newOrgs...)
+		organizations = append(organizations, newOrgs...)
 	}
 	return c.JSON(fiber.Map{
 		"status":        200,
@@ -80,4 +80,12 @@ func GetAllOrgs(c *fiber.Ctx) error {
 		"data":   users,
 	})
 
+}
+
+func MakeFavorite(c *fiber.Ctx){
+
+    var body struct{
+        User string
+        Organization string
+    }
 }
