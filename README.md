@@ -27,7 +27,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 - body: 
 ```json
 {
-        "tags":[] // los tags que quieras agregar
+        "tags":[] // los tags que quieras buscar
     }
 ```
 - descripcion: obtiene organizaciones que tienen los tags que buscas
