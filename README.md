@@ -75,7 +75,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 - body:
 ```json
 {
-        "user":"el id del usuario""
+        "user":"el id del usuario"
         "organization":"el id de la organizacion"
     }
 ```
