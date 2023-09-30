@@ -6,5 +6,5 @@ import (
 )
 
 func SetPostsRoutes(app *fiber.App) {
-	app.Get("/posts/ig/getFromTag", controllers.GetPostsFromTag)
+	app.Post("/posts/ig/getFromTag", controllers.GetPostsFromTag)
 }

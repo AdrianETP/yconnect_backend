@@ -7,6 +7,7 @@ import (
 	"github.com/adrianetp/yconnect_backend/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func CreateOrganization(c *fiber.Ctx) error {
@@ -80,18 +81,17 @@ func GetAllOrgs(c *fiber.Ctx) error {
 		"data":   organizations,
 	})
 
-
 }
 
-/* func MakeFavorite(c *fiber.Ctx) {
+func MakeFavorite(c *fiber.Ctx) {
 
 	var body struct {
-		User         string
-		Organization string
+		User         primitive.ObjectID
+		Organization primitive.ObjectID
 	}
 
 	c.BodyParser(&body)
 
-	config.Database.Collection("organization").UpdateOne(context.TODO(), bson.D{{"name" , body.Organization}})
+	config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
 
-} */
+}

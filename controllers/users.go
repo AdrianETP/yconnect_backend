@@ -7,6 +7,7 @@ import (
 	"github.com/adrianetp/yconnect_backend/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func AddUser(c *fiber.Ctx) error {
@@ -51,5 +52,29 @@ func GetAllUsers(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   users,
 	})
+
+}
+
+func AddtoFavorites(c *fiber.Ctx) error {
+
+	var body struct {
+        User         primitive.ObjectID `json:user`
+        Organization primitive.ObjectID `json:organization`
+	}
+
+	c.BodyParser(&body)
+
+	results, err := config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
+
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+    return c.JSON(fiber.Map{
+        "status": 200,
+        "result": results,
+    })
 
 }

@@ -8,4 +8,5 @@ import (
 func setUserRoutes(app *fiber.App){
     app.Get("/users" , controllers.GetAllUsers)
     app.Post("/users", controllers.AddUser)
+    app.Post("/users/addFavorites" , controllers.AddtoFavorites)
 }
