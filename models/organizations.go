@@ -1,14 +1,16 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Organization struct {
-	Id          string   `json:_id`
-	Name        string   `json:name`
-	Location    string   `json:location`
-	Description string   `json:description`
-	Tags        []string `json:tags`
-	Igtag       string   `json:igtag`
-	FbTag       string   `json:fbtag`
-	Images      string   `json:images`
-	Telephone   string   `json:telephone`
-	Email       string   `json:emaiL`
+	ID          primitive.ObjectID `bson:"_id, omitempty" json:id`
+	Name        string             `json:name`
+	Location    string             `json:location`
+	Description string             `json:description`
+	Tags        []string           `json:tags`
+	Igtag       string             `json:igtag`
+	FbTag       string             `json:fbtag`
+	Images      string             `json:images`
+	Telephone   string             `json:telephone`
+	Email       string             `json:emaiL`
 }

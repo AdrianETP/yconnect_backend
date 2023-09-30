@@ -59,7 +59,7 @@ func GetOrgByTag(c *fiber.Ctx) error {
 
 func GetAllOrgs(c *fiber.Ctx) error {
 	// vamos a guardar los usuarios decodificados aqui
-	var users []models.Organization
+	var organizations []models.Organization
 	// aqui vamos a llamar a mongo y decirle que encuentre a usuarios pero sin filtro ( osea que saque a todos los usuarios)
 	results, err := config.Database.Collection("organization").Find(context.TODO(), bson.M{})
 	if err != nil {
@@ -70,22 +70,28 @@ func GetAllOrgs(c *fiber.Ctx) error {
 	}
 	// aca vamos a iterar por todos los resultados y decodificarlos
 	for results.Next(context.TODO()) {
-		var user models.Organization
-		results.Decode(&user)
-		users = append(users, user)
+		var organnization models.Organization
+		results.Decode(&organnization)
+		organizations = append(organizations, organnization)
 	}
 	// regresamos a los usuarios como json
 	return c.JSON(fiber.Map{
 		"status": 200,
-		"data":   users,
+		"data":   organizations,
 	})
 
+
 }
 
-func MakeFavorite(c *fiber.Ctx){
+/* func MakeFavorite(c *fiber.Ctx) {
 
-    var body struct{
-        User string
-        Organization string
-    }
-}
+	var body struct {
+		User         string
+		Organization string
+	}
+
+	c.BodyParser(&body)
+
+	config.Database.Collection("organization").UpdateOne(context.TODO(), bson.D{{"name" , body.Organization}})
+
+} */

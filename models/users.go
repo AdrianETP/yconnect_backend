@@ -1,7 +1,9 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type User struct {
-    Id string `json:_id`
+    Id primitive.ObjectID `bson:"_id, omniempty" json:id`
 	Name        string   `json:name`
 	Telephone   string   `json:telephone`
 	Email       string   `json:email`
