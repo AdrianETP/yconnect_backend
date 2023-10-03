@@ -55,7 +55,6 @@ func GetOrgByTag(c *fiber.Ctx) error {
 		"status":        200,
 		"organizations": organizations,
 	})
-
 }
 
 func GetAllOrgs(c *fiber.Ctx) error {
@@ -80,18 +79,40 @@ func GetAllOrgs(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   organizations,
 	})
-
 }
 
-func MakeFavorite(c *fiber.Ctx) {
-
+func GetFavorites(c *fiber.Ctx) error {
 	var body struct {
-		User         primitive.ObjectID
-		Organization primitive.ObjectID
+		UserID primitive.ObjectID `json:userId`
 	}
-
 	c.BodyParser(&body)
 
-	config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
+	results := config.Database.Collection("Users").
+		FindOne(context.TODO(), bson.D{{"_id", body.UserID}})
+	var user models.User
+	results.Decode(&user)
+	var organizations []models.Organization
+	for _, v := range user.Favorites {
+		r, err := config.Database.Collection("organization").
+			Find(context.TODO(), bson.D{{"_id", v}})
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"status": 400,
+				"error":  err.Error(),
+			})
+		}
 
+		for r.Next(context.TODO()) {
+			var org models.Organization
+
+			r.Decode(&org)
+			organizations = append(organizations, org)
+
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   organizations,
+	})
 }

@@ -13,14 +13,13 @@ func GetPostsFromTag(c *fiber.Ctx) error {
 	c.Accepts("json", "text") // "json"
 	c.Accepts("application/json")
 	var posts []models.PostType
-	var user models.User
-	c.BodyParser(&user)
-	tags := user.Tags
-
+	var body struct {
+		Tags []string `json:tags`
+	}
+	c.BodyParser(&body)
+	tags := body.Tags
 	orgCol := config.Database.Collection("organization")
-
 	for _, t := range tags {
-
 		results, _ := orgCol.Find(context.TODO(), bson.D{
 			{"tags", bson.D{{"$elemMatch", bson.D{{"$eq", t}}}}},
 		})
@@ -61,7 +60,13 @@ func GetPostsFromTag(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-        "status":200,
-		"data": posts,
+		"status": 200,
+		"data":   posts,
+	})
+}
+
+func GetVideoFromTag(c *fiber.Ctx) error {
+	return c.JSON(fiber.Map{
+		"data": nil,
 	})
 }

@@ -14,7 +14,6 @@ func AddUser(c *fiber.Ctx) error {
 	var user models.User
 	c.BodyParser(&user)
 	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), user)
-
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"status": 400,
@@ -26,7 +25,6 @@ func AddUser(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   result,
 	})
-
 }
 
 // vamos a obtener a todos los usuarios en esta llamada get
@@ -52,29 +50,26 @@ func GetAllUsers(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   users,
 	})
-
 }
 
 func AddtoFavorites(c *fiber.Ctx) error {
-
 	var body struct {
-        User         primitive.ObjectID `json:user`
-        Organization primitive.ObjectID `json:organization`
+		User         primitive.ObjectID `json:user`
+		Organization primitive.ObjectID `json:organization`
 	}
 
 	c.BodyParser(&body)
 
-	results, err := config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
-
+	results, err := config.Database.Collection("Users").
+		UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"status": 400,
 			"error":  err.Error(),
 		})
 	}
-    return c.JSON(fiber.Map{
-        "status": 200,
-        "result": results,
-    })
-
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"result": results,
+	})
 }
