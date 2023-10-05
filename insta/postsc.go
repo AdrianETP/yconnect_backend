@@ -65,8 +65,55 @@ func GetPostsFromTag(c *fiber.Ctx) error {
 	})
 }
 
-func GetVideoFromTag(c *fiber.Ctx) error {
+func GetPostsByName(c *fiber.Ctx) error {
+	c.Accepts("json", "text") // "json"
+	c.Accepts("application/json")
+	var posts []models.PostType
+	var body struct {
+		Name string
+	}
+	c.BodyParser(&body)
+	orgCol := config.Database.Collection("organization")
+	results, _ := orgCol.Find(context.TODO(), bson.D{
+		{"name", body.Name},
+	})
+
+	i := 0
+	var organizations []models.Organization
+
+	for results.Next(context.TODO()) && i < 10 {
+		var organization models.Organization
+		results.Decode(&organization)
+		organizations = append(organizations, organization)
+		i++
+
+	}
+	for _, v := range organizations {
+
+		instaUser, err := config.Insta.VisitProfile(v.Igtag)
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"status": 400,
+				"error":  err,
+			})
+		}
+		for i, p := range instaUser.Feed.Items {
+			if i >= 3 {
+				break
+			}
+			var post models.PostType = models.PostType{
+				User:    v.Igtag,
+				Caption: p.Caption.Text,
+				Image:   p.Images.GetBest(),
+			}
+			posts = append(posts, post)
+
+		}
+
+	}
+
 	return c.JSON(fiber.Map{
-		"data": nil,
+		"status": 200,
+		"data":   posts,
 	})
 }

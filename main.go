@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/adrianetp/yconnect_backend/config"
 	"github.com/adrianetp/yconnect_backend/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"log"
-	"os"
 )
 
 func main() {
@@ -19,7 +20,6 @@ func main() {
 	config.ConnectDB()
 	port := os.Getenv("PORT")
 	app := fiber.New()
-	config.InstaLogin()
 
 	routes.SetAllRoutes(app)
 	app.Get("/", func(c *fiber.Ctx) error {

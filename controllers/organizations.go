@@ -116,3 +116,29 @@ func GetFavorites(c *fiber.Ctx) error {
 		"data":   organizations,
 	})
 }
+
+func GetOrgByName(c *fiber.Ctx) error {
+	var body struct {
+		Name string
+	}
+	c.BodyParser(&body)
+	result, err := config.Database.Collection("organization").
+		Find(context.TODO(), bson.D{{"name", bson.D{{"$regex", primitive.Regex{Pattern: ".*" + body.Name + ".*", Options: "i"}}}}})
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+	var organizations []models.Organization
+
+	for result.Next(context.TODO()) {
+		var organization models.Organization
+		result.Decode(&organization)
+		organizations = append(organizations, organization)
+	}
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   organizations,
+	})
+}
