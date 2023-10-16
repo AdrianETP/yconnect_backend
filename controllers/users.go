@@ -99,5 +99,24 @@ func ModifyUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
+func AddTags(c *fiber.Ctx) error {
+	var body struct {
+		UserId primitive.ObjectID `json:userid`
+		Tags   []string           `json:tags`
+	}
+
+	for _, v := range body.Tags {
+		_, err := config.Database.Collection("Users").
+			UpdateOne(context.TODO(), bson.D{{"_id", body.UserId}}, bson.D{{"$push", bson.D{{"tags", v}}}})
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"status": 400,
+				"error":  err.Error(),
+			})
+		}
+	}
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   body.Tags,
 	})
 }
