@@ -74,3 +74,53 @@ func AddtoFavorites(c *fiber.Ctx) error {
 		"result": results,
 	})
 }
+
+func ModifyUser(c *fiber.Ctx) error {
+	var body struct {
+		Organization models.Organization `json:organization`
+	}
+	result, err := config.Database.Collection("organization").
+		UpdateOne(context.TODO(), bson.D{{"_id", body.Organization.ID}}, bson.D{
+			{"name", body.Organization.Name},
+			{"location", body.Organization.Location},
+			{"telephone", body.Organization.Telephone},
+			{"tags", body.Organization.Tags},
+			{"igtag", body.Organization.Tags},
+			{"igurrl", body.Organization.IgUrl},
+			{"description", body.Organization.Description},
+			{"email", body.Organization.Email},
+		})
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"error":  err.Error(),
+			"status": 400,
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   result,
+	})
+}
+
+func AddTags(c *fiber.Ctx) error {
+	var body struct {
+		UserId primitive.ObjectID `json:userid`
+		Tags   []string           `json:tags`
+	}
+
+	for _, v := range body.Tags {
+		_, err := config.Database.Collection("Users").
+			UpdateOne(context.TODO(), bson.D{{"_id", body.UserId}}, bson.D{{"$push", bson.D{{"tags", v}}}})
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"status": 400,
+				"error":  err.Error(),
+			})
+		}
+	}
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   body.Tags,
+	})
+}

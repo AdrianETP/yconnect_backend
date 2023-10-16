@@ -61,7 +61,7 @@ func GetOrgByTag(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{
 		"status":        200,
-		"organizations": organizations,
+		"Organizations": organizations,
 	})
 }
 
@@ -127,7 +127,7 @@ func GetFavorites(c *fiber.Ctx) error {
 
 func GetOrgByName(c *fiber.Ctx) error {
 	var body struct {
-		Name string
+		Name string `json:name`
 	}
 	c.BodyParser(&body)
 	result, err := config.Database.Collection("organization").
@@ -166,6 +166,50 @@ func DeleteOrg(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
+}
+
+func GetOrgById(c *fiber.Ctx) error {
+	var body struct {
+		OrgId primitive.ObjectID `json:orgid`
+	}
+
+	c.BodyParser(&body)
+
+	result := config.Database.Collection("organization").
+		FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
+
+	var organization models.Organization
+
+	result.Decode(&organization)
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   organization,
+	})
+}
+
+func ModifyOrg(c *fiber.Ctx) error {
+	var body struct {
+		Organization models.Organization `json:organization`
+	}
+
+	result, err := config.Database.Collection("organization").
+		UpdateOne(context.TODO(), bson.D{{"_id", body.Organization.ID}}, bson.D{
+			{"name", body.Organization.Name},
+			{"location", body.Organization.Location},
+			{"telephone", body.Organization.Telephone},
+			{"tags", body.Organization.Tags},
+			{"igurrl", body.Organization.IgUrl},
+			{"description", body.Organization.Description},
+			{"email", body.Organization.Email},
+		})
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"error":  err.Error(),
+			"status": 400,
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
