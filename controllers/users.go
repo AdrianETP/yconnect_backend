@@ -124,3 +124,25 @@ func AddTags(c *fiber.Ctx) error {
 		"data":   body.Tags,
 	})
 }
+
+func DeleteUser(c *fiber.Ctx) error {
+	var body struct {
+		UserId primitive.ObjectID `json:userid`
+	}
+
+	c.BodyParser(&body)
+
+	result, err := config.Database.Collection("User").
+		DeleteOne(context.TODO(), bson.D{{"_id", body.UserId}})
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   result,
+	})
+}

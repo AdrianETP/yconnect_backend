@@ -10,4 +10,5 @@ func setUserRoutes(app *fiber.App) {
 	app.Post("/users", controllers.AddUser)
 	app.Post("/users/addFavorites", controllers.AddtoFavorites)
 	app.Post("/users/addTags", controllers.AddTags)
+	app.Post("/users/Delete", controllers.DeleteUser)
 }
