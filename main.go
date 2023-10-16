@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-
 	"github.com/adrianetp/yconnect_backend/config"
 	"github.com/adrianetp/yconnect_backend/routes"
 	"github.com/gofiber/fiber/v2"

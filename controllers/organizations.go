@@ -12,13 +12,21 @@ import (
 
 func CreateOrganization(c *fiber.Ctx) error {
 	var Org models.Organization
-	c.BodyParser(&Org)
+	Org.ID = primitive.NewObjectID()
+	err := c.BodyParser(&Org)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+	print(Org.Name)
 	result, error := config.Database.Collection("organization").InsertOne(context.TODO(), Org)
 
 	if error != nil {
-		c.JSON(fiber.Map{
+		return c.JSON(fiber.Map{
 			"status": 400,
-			"error":  error,
+			"error":  error.Error(),
 		})
 	}
 
@@ -46,7 +54,7 @@ func GetOrgByTag(c *fiber.Ctx) error {
 		for results.Next(context.TODO()) {
 			var organization models.Organization
 			results.Decode(&organization)
-			organizations = append(newOrgs, organization)
+			newOrgs = append(newOrgs, organization)
 
 		}
 		organizations = append(organizations, newOrgs...)
@@ -140,5 +148,26 @@ func GetOrgByName(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   organizations,
+	})
+}
+
+func DeleteOrg(c *fiber.Ctx) error {
+	var body struct {
+		OrgId primitive.ObjectID `json:orgId`
+	}
+	c.BodyParser(&body)
+
+	result, err := config.Database.Collection("organization").DeleteOne(context.TODO(), bson.D{
+		{"_id", body.OrgId},
+	})
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   result,
 	})
 }

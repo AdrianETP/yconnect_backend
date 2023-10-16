@@ -9,8 +9,7 @@ type Organization struct {
 	Description string             `json:description`
 	Tags        []string           `json:tags`
 	Igtag       string             `json:igtag`
-	FbTag       string             `json:fbtag`
-	Images      string             `json:images`
+	IgUrl       string             `json:igurl`
 	Telephone   string             `json:telephone`
 	Email       string             `json:emaiL`
 }

@@ -20,7 +20,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
 
 ```
-/organization/searchByTag
+/organizations/searchByTag
 ```
 
 - tipo: POST

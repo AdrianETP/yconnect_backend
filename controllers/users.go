@@ -13,6 +13,7 @@ import (
 func AddUser(c *fiber.Ctx) error {
 	var user models.User
 	c.BodyParser(&user)
+	user.Id = primitive.NewObjectID()
 	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), user)
 	if err != nil {
 		return c.JSON(fiber.Map{
