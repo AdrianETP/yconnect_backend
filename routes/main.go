@@ -5,6 +5,6 @@ import "github.com/gofiber/fiber/v2"
 func SetAllRoutes(app *fiber.App) {
 	setAuthRoute(app)
 	setUserRoutes(app)
-	// SetPostsRoutes(app)
+	SetPostsRoutes(app)
 	setOrgRoutes(app)
 }
