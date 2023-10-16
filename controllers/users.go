@@ -99,6 +99,9 @@ func ModifyUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
+	})
+}
+
 func AddTags(c *fiber.Ctx) error {
 	var body struct {
 		UserId primitive.ObjectID `json:userid`
