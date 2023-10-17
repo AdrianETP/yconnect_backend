@@ -167,8 +167,8 @@ func DeleteOrg(c *fiber.Ctx) error {
 		})
 	}
 	return c.JSON(fiber.Map{
-		"status": 200,
 		"data":   result,
+		"status": 200,
 	})
 }
 
@@ -218,7 +218,4 @@ func ModifyOrg(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   result,
 	})
-}
-
-func SendMail(c fiber.Ctx) error {
 }
