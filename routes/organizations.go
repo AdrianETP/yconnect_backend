@@ -14,4 +14,5 @@ func setOrgRoutes(app *fiber.App) {
 	app.Post("organizations/Delete", controllers.DeleteOrg)
 	app.Post("/organization/SearchById", controllers.GetOrgById)
 	app.Post("/organization/ModifyOrg", controllers.ModifyOrg)
+	app.Get("/organizations/SendMail", controllers.SendMail)
 }

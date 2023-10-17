@@ -2,12 +2,15 @@ package controllers
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 
 	"github.com/adrianetp/yconnect_backend/config"
 	"github.com/adrianetp/yconnect_backend/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gopkg.in/gomail.v2"
 )
 
 func CreateOrganization(c *fiber.Ctx) error {
@@ -199,13 +202,15 @@ func ModifyOrg(c *fiber.Ctx) error {
 
 	result, err := config.Database.Collection("organization").
 		UpdateOne(context.TODO(), bson.D{{"_id", body.Organization.ID}}, bson.D{
-			{"name", body.Organization.Name},
-			{"location", body.Organization.Location},
-			{"telephone", body.Organization.Telephone},
-			{"tags", body.Organization.Tags},
-			{"igurrl", body.Organization.IgUrl},
-			{"description", body.Organization.Description},
-			{"email", body.Organization.Email},
+			{"$set", bson.D{
+				{"name", body.Organization.Name},
+				{"location", body.Organization.Location},
+				{"telephone", body.Organization.Telephone},
+				{"tags", body.Organization.Tags},
+				{"igurrl", body.Organization.IgUrl},
+				{"description", body.Organization.Description},
+				{"email", body.Organization.Email},
+			}},
 		})
 	if err != nil {
 		return c.JSON(fiber.Map{
@@ -217,5 +222,51 @@ func ModifyOrg(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
+	})
+}
+
+func SendMail(c *fiber.Ctx) error {
+	var body models.Organization
+
+	c.BodyParser(&body)
+
+	m := gomail.NewMessage()
+
+	// Set E-Mail sender
+	m.SetHeader("From", "adrianed.t.p@gmail.com")
+
+	// Set E-Mail receivers
+	m.SetHeader("To", "eduardotrevinop@yahoo.com.mx")
+
+	// Set E-Mail subject
+	m.SetHeader("Subject", "nueva organizacion")
+
+	// Set E-Mail body. You can set plain text or html with text/html
+	m.SetBody("text/html", `<h1>new organization</h1>
+        <ul>
+            <li><b>name: </b>`+body.Name+`</li>
+            <li><b>description: </b>`+body.Description+`</li>
+            <li><b>telephone: </b>`+body.Telephone+`</li>
+            <li><b>location: </b>`+body.Location+`</li>
+            <li><b>email: </b>`+body.Email+`</li>
+            <li><b>igtag: </b>`+body.Igtag+`</li>
+        </ul>`)
+
+	// Settings for SMTP server
+	d := gomail.NewDialer("smtp.gmail.com", 587, "adrianed.t.p@gmail.com", "zayi ljba pflg whqk")
+
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	// Now send E-Mail
+	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   "email sent to admin",
 	})
 }
