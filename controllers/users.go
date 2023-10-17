@@ -131,8 +131,9 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	c.BodyParser(&body)
+	print(body.UserId.String())
 
-	result, err := config.Database.Collection("User").
+	result, err := config.Database.Collection("Users").
 		DeleteOne(context.TODO(), bson.D{{"_id", body.UserId}})
 	if err != nil {
 		return c.JSON(fiber.Map{
@@ -143,6 +144,37 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status": 200,
+		"data":   result,
+	})
+}
+
+func EditUser(c *fiber.Ctx) error {
+	var body models.User
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+		})
+	}
+
+	updateFields := bson.D{{"$set", bson.D{
+		{"name", body.Name},
+		{"telephone", body.Telephone},
+		{"description", body.Description},
+		{"tags", body.Tags},
+		{"favorites", body.Favorites},
+	}}}
+
+	result, err := config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.Id}}, updateFields)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  fiber.StatusInternalServerError,
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": fiber.StatusOK,
 		"data":   result,
 	})
 }

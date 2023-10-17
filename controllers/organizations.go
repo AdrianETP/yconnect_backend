@@ -166,6 +166,10 @@ func DeleteOrg(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"data":   result,
+	})
 }
 
 func GetOrgById(c *fiber.Ctx) error {
@@ -214,4 +218,7 @@ func ModifyOrg(c *fiber.Ctx) error {
 		"status": 200,
 		"data":   result,
 	})
+}
+
+func SendMail(c fiber.Ctx) error {
 }
