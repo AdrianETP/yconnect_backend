@@ -178,3 +178,20 @@ func EditUser(c *fiber.Ctx) error {
 		"data":   result,
 	})
 }
+
+func Login(c *fiber.Ctx) error {
+	var body struct {
+		Telephone string `json:telephone`
+	}
+	c.BodyParser(&body)
+
+	result := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"telephone", body.Telephone}})
+
+	var user models.User
+	result.Decode(&user)
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"result": user,
+	})
+}

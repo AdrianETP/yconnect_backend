@@ -9,6 +9,7 @@ type User struct {
 	Description string               `json:description`
 	Tags        []string             `json:tags`
 	Favorites   []primitive.ObjectID `json:favorites`
+	Password    string               `json:password`
 }
 
 type UserLogin struct {
