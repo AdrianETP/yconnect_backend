@@ -48,19 +48,28 @@ func GetOrgByTag(c *fiber.Ctx) error {
 
 	var organizations []models.Organization
 	for _, t := range tags {
-
 		results, _ := orgCol.Find(context.TODO(), bson.D{
 			{"tags", bson.D{{"$elemMatch", bson.D{{"$eq", t}}}}},
 		})
-		var newOrgs []models.Organization
 
 		for results.Next(context.TODO()) {
 			var organization models.Organization
 			results.Decode(&organization)
-			newOrgs = append(newOrgs, organization)
+			inOrg := false
+			if len(organizations) <= 0 {
+				organizations = append(organizations, organization)
+			} else {
+				for i := 0; i < len(organizations); i++ {
+					if organization.ID.String() == organizations[i].ID.String() {
+						inOrg = true
+					}
+				}
+				if !inOrg {
+					organizations = append(organizations, organization)
+				}
+			}
 
 		}
-		organizations = append(organizations, newOrgs...)
 	}
 	return c.JSON(fiber.Map{
 		"status":        200,
@@ -243,6 +252,7 @@ func SendMail(c *fiber.Ctx) error {
 
 	// Set E-Mail body. You can set plain text or html with text/html
 	m.SetBody("text/html", `<h1>new organization</h1>
+        <p>una nueva organizacion ah solicitado  registrarse, estos son sus datos</p>
         <ul>
             <li><b>name: </b>`+body.Name+`</li>
             <li><b>description: </b>`+body.Description+`</li>
