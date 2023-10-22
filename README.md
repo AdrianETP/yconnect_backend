@@ -1,4 +1,4 @@
-# yconnect backend
+# yconnect backen 
 
 Yconnect es una app de ios para conectar organizaciones con usuarios. Este repo contiene el backend hecho en golang con el framework __fiber__ para todas las llamadas web
 

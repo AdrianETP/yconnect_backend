@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"os"
 
 	"github.com/adrianetp/yconnect_backend/config"
 	"github.com/adrianetp/yconnect_backend/models"
@@ -241,11 +242,15 @@ func SendMail(c *fiber.Ctx) error {
 
 	m := gomail.NewMessage()
 
+	adminMail := os.Getenv("ADMINMAIL")
+	recieverMail := os.Getenv("RECIEVERMAIL")
+	adminPass := os.Getenv("ADMINPASS")
+
 	// Set E-Mail sender
-	m.SetHeader("From", "adrianed.t.p@gmail.com")
+	m.SetHeader("From", adminMail)
 
 	// Set E-Mail receivers
-	m.SetHeader("To", "eduardotrevinop@yahoo.com.mx")
+	m.SetHeader("To", recieverMail)
 
 	// Set E-Mail subject
 	m.SetHeader("Subject", "nueva organizacion")
@@ -263,7 +268,7 @@ func SendMail(c *fiber.Ctx) error {
         </ul>`)
 
 	// Settings for SMTP server
-	d := gomail.NewDialer("smtp.gmail.com", 587, "adrianed.t.p@gmail.com", "zayi ljba pflg whqk")
+	d := gomail.NewDialer("smtp.gmail.com", 587, adminMail, adminPass)
 
 	// This is only needed when SSL/TLS certificate is not valid on server.
 	// In production this should be set to false.
