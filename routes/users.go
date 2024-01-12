@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// linkeamos un controller con una ruta (esta funcion se llama en el main del folder routes)
 func setUserRoutes(app *fiber.App) {
 	app.Get("/users", controllers.GetAllUsers)
 	app.Post("/users", controllers.AddUser)

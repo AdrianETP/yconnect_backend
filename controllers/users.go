@@ -10,18 +10,26 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// funcion para agregar un usuario
 func AddUser(c *fiber.Ctx) error {
+	// variable para parsear el body de la request
 	var user models.User
+	// parseamos el body de la request
 	c.BodyParser(&user)
+	// agregamos un id unico al usuario
 	user.Id = primitive.NewObjectID()
+	// agregamos el usuario a la base de datos
 	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), user)
+	// si da un error
 	if err != nil {
+		// regresamos el error
 		return c.JSON(fiber.Map{
 			"status": 400,
 			"error":  err,
 		})
 	}
 
+	// regresamos el resultado
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
@@ -53,132 +61,132 @@ func GetAllUsers(c *fiber.Ctx) error {
 	})
 }
 
+// agregamos organizaciones favoritas al usuario
 func AddtoFavorites(c *fiber.Ctx) error {
+	// variable para parsear el body
 	var body struct {
-		User         primitive.ObjectID `json:user`
-		Organization primitive.ObjectID `json:organization`
+		UserID         primitive.ObjectID `json:user`
+		OrganizationID primitive.ObjectID `json:organization`
 	}
 
+	// parseamos el body
 	c.BodyParser(&body)
 
+	// agregamos el id de la organizacion a los favoritos del usuario
 	results, err := config.Database.Collection("Users").
-		UpdateOne(context.TODO(), bson.D{{"_id", body.User}}, bson.D{{"$push", bson.D{{"favorites", body.Organization}}}})
+		UpdateOne(context.TODO(), bson.D{{"_id", body.UserID}}, bson.D{{"$push", bson.D{{"favorites", body.OrganizationID}}}})
+		// si da un error
 	if err != nil {
+		// regresamos el error
 		return c.JSON(fiber.Map{
 			"status": 400,
 			"error":  err.Error(),
 		})
 	}
+	// regresamos el resultado
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"result": results,
 	})
 }
 
+// funcion para modificar a un usuario
 func ModifyUser(c *fiber.Ctx) error {
+	// variable para parsear el body
 	var body struct {
-		Organization models.Organization `json:organization`
+		User models.User `json:user`
 	}
-	result, err := config.Database.Collection("organization").
-		UpdateOne(context.TODO(), bson.D{{"_id", body.Organization.ID}}, bson.D{
-			{"name", body.Organization.Name},
-			{"location", body.Organization.Location},
-			{"telephone", body.Organization.Telephone},
-			{"tags", body.Organization.Tags},
-			{"igtag", body.Organization.Tags},
-			{"igurrl", body.Organization.IgUrl},
-			{"description", body.Organization.Description},
-			{"email", body.Organization.Email},
+	// parseamos el body
+	c.BodyParser(&body)
+	// modificamos el
+	result, err := config.Database.Collection("Users").
+		UpdateOne(context.TODO(), bson.D{{"_id", body.User.ID}}, bson.D{
+			{"name", body.User.Name},
+			{"telephone", body.User.Telephone},
+			{"tags", body.User.Tags},
+			{"description", body.User.Description},
+			{"favorites", body.User.Favorites},
+			{"password", body.User.Password},
 		})
+		// si da un error
 	if err != nil {
+		// regresamos el error
 		return c.JSON(fiber.Map{
 			"error":  err.Error(),
 			"status": 400,
 		})
 	}
 
+	// regresamos los resultados
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
 	})
 }
 
+// funcion para agregar tags de interes a un usuario
 func AddTags(c *fiber.Ctx) error {
+	// variable para parsear el body
 	var body struct {
 		UserId primitive.ObjectID `json:userid`
 		Tags   []string           `json:tags`
 	}
 
+	// parseamos el body
+	c.BodyParser(&body)
+
+	// iteramos por cada tag
 	for _, v := range body.Tags {
+		// agregamos el tag a la lista de tags del usuario
 		_, err := config.Database.Collection("Users").
 			UpdateOne(context.TODO(), bson.D{{"_id", body.UserId}}, bson.D{{"$push", bson.D{{"tags", v}}}})
+			// si hubo un error
 		if err != nil {
+			// regresamos el error
 			return c.JSON(fiber.Map{
 				"status": 400,
 				"error":  err.Error(),
 			})
 		}
 	}
+	// regresamos el resultado
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   body.Tags,
 	})
 }
 
+// funcion para borrar un usuario
 func DeleteUser(c *fiber.Ctx) error {
+	// variable para parsear el body
 	var body struct {
 		UserId primitive.ObjectID `json:userid`
 	}
 
+	// parseamos el body
 	c.BodyParser(&body)
-	print(body.UserId.String())
 
+	// borramos el usuario
 	result, err := config.Database.Collection("Users").
 		DeleteOne(context.TODO(), bson.D{{"_id", body.UserId}})
+		// si hubo un error
 	if err != nil {
+		// regresamos el error
 		return c.JSON(fiber.Map{
 			"status": 400,
 			"error":  err.Error(),
 		})
 	}
 
+	// regresamos el resultado
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
 	})
 }
 
-func EditUser(c *fiber.Ctx) error {
-	var body models.User
-	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  fiber.StatusBadRequest,
-			"message": err.Error(),
-		})
-	}
-
-	updateFields := bson.D{{"$set", bson.D{
-		{"name", body.Name},
-		{"telephone", body.Telephone},
-		{"description", body.Description},
-		{"tags", body.Tags},
-		{"favorites", body.Favorites},
-	}}}
-
-	result, err := config.Database.Collection("Users").UpdateOne(context.TODO(), bson.D{{"_id", body.Id}}, updateFields)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  fiber.StatusInternalServerError,
-			"message": err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status": fiber.StatusOK,
-		"data":   result,
-	})
-}
-
+// funcion de login
+// TODO crear una nueva funcion de login por que esta era dummie
 func Login(c *fiber.Ctx) error {
 	var body struct {
 		Telephone string `json:telephone`

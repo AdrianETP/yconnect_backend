@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// linkeamos un controller con una ruta (esta funcion se llama en el main del folder routes)
 func setOrgRoutes(app *fiber.App) {
 	app.Post("/organizations", controllers.CreateOrganization)
 	app.Get("/organizations", controllers.GetAllOrgs)
