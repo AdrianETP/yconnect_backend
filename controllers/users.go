@@ -100,7 +100,7 @@ func ModifyUser(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 	// modificamos el
 	result, err := config.Database.Collection("Users").
-		UpdateOne(context.TODO(), bson.D{{"_id", body.User.ID}}, bson.D{
+		UpdateOne(context.TODO(), bson.D{{"_id", body.User.Id}}, bson.D{
 			{"name", body.User.Name},
 			{"telephone", body.User.Telephone},
 			{"tags", body.User.Tags},

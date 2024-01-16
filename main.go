@@ -28,13 +28,14 @@ func main() {
 	})
 
 	// Paths to your SSL certificate and private key files
-	certFile := os.Getenv("CERTPATH")
-	keyFile := os.Getenv("KEYPATH")
+	// certFile := os.Getenv("CERTPATH")
+	// keyFile := os.Getenv("KEYPATH")
 	config.ConnectDB()
 	routes.SetAllRoutes(app)
 
 	// Start the HTTPS server
-	err := app.ListenTLS(":443", certFile, keyFile)
+	// err := app.ListenTLS(":443", certFile, keyFile)
+	err := app.Listen(":3000")
 	if err != nil {
 		panic("Error starting server: " + err.Error())
 	}
