@@ -32,7 +32,7 @@ func CreateOrganization(c *fiber.Ctx) error {
 		})
 	}
 	// insertar a la organizacion a la base de datos
-	result, error := config.Database.Collection("organization").InsertOne(context.TODO(), Org)
+	result, error := config.Database.Collection("Organizations").InsertOne(context.TODO(), Org)
 
 	// si hubo un error
 	if error != nil {
@@ -62,7 +62,7 @@ func GetOrgByTag(c *fiber.Ctx) error {
 	tags := Tag.Tags
 
 	// coleccion de organizaciones
-	orgCol := config.Database.Collection("organization")
+	orgCol := config.Database.Collection("Organizations")
 
 	// variable donde vamos a guardar los resultados
 	var organizations []models.Organization
@@ -105,7 +105,7 @@ func GetOrgByTag(c *fiber.Ctx) error {
 	//  regresamos las organizaciones
 	return c.JSON(fiber.Map{
 		"status":        200,
-		"Organizations": organizations,
+		"organizations": organizations,
 	})
 }
 
@@ -114,7 +114,7 @@ func GetAllOrgs(c *fiber.Ctx) error {
 	// vamos a guardar los usuarios decodificados aqui
 	var organizations []models.Organization
 	// aqui vamos a llamar a mongo y decirle que encuentre a usuarios pero sin filtro ( osea que saque a todos los usuarios)
-	results, err := config.Database.Collection("organization").Find(context.TODO(), bson.M{})
+	results, err := config.Database.Collection("Organizations").Find(context.TODO(), bson.M{})
 	// si da un error
 	if err != nil {
 		// regresamos el error
@@ -158,7 +158,7 @@ func GetFavorites(c *fiber.Ctx) error {
 	// por cada favorita (favoritos siendo el id de las organizaciones)
 	for _, v := range user.Favorites {
 		//  buscamos la organizacion
-		r, err := config.Database.Collection("organization").
+		r, err := config.Database.Collection("Organizations").
 			Find(context.TODO(), bson.D{{"_id", v}})
 			// si da un error
 		if err != nil {
@@ -196,7 +196,7 @@ func GetOrgByName(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 
 	// lo que checa este query es que el nombre de la organizacion este en cualquier parte de la string (sin importar las mayusculas)
-	result, err := config.Database.Collection("organization").
+	result, err := config.Database.Collection("Organizations").
 		Find(context.TODO(), bson.D{{"name", bson.D{{"$regex", primitive.Regex{Pattern: ".*" + body.Name + ".*", Options: "i"}}}}}) // el Options: i significa case insensitive
 	if err != nil {
 		return c.JSON(fiber.Map{
@@ -232,7 +232,7 @@ func DeleteOrg(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 
 	// borramos la organizacion en la base de datos
-	result, err := config.Database.Collection("organization").DeleteOne(context.TODO(), bson.D{
+	result, err := config.Database.Collection("Organizations").DeleteOne(context.TODO(), bson.D{
 		{"_id", body.OrgId},
 	})
 	// si hay un error
@@ -261,7 +261,7 @@ func GetOrgById(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 
 	// buscamos una organizacion con ese id
-	result := config.Database.Collection("organization").
+	result := config.Database.Collection("Organizations").
 		FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
 
 		// creamos una variable para el resultado
@@ -270,8 +270,8 @@ func GetOrgById(c *fiber.Ctx) error {
 	result.Decode(&organization)
 	// enviamos el resultado
 	return c.JSON(fiber.Map{
-		"status": 200,
-		"data":   organization,
+		"status":       200,
+		"organization": organization,
 	})
 }
 
@@ -285,7 +285,7 @@ func ModifyOrg(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 
 	// query para modificar la organizacion (la encuentra en base al id)
-	result, err := config.Database.Collection("organization").
+	result, err := config.Database.Collection("Organizations").
 		UpdateOne(context.TODO(), bson.D{{"_id", body.Organization.ID}}, bson.D{
 			{"$set", bson.D{
 				{"name", body.Organization.Name},

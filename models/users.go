@@ -10,10 +10,10 @@ type User struct {
 	Tags        []string             `json:tags`
 	Favorites   []primitive.ObjectID `json:favorites`
 	Password    string               `json:password`
+	Email       string               `json:email`
 }
 
 type UserLogin struct {
-	Telephone string `json:telephone`
-	Password  string `json:password`
-	WebToken  string `json:webtoken`
+	Email    string `json:email`
+	Password string `json:password`
 }
