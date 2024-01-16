@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/adrianetp/yconnect_backend/config"
+	"github.com/adrianetp/yconnect_backend/encryption"
 	"github.com/adrianetp/yconnect_backend/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,7 +20,10 @@ func AddUser(c *fiber.Ctx) error {
 	// agregamos un id unico al usuario
 	user.Id = primitive.NewObjectID()
 	// agregamos el usuario a la base de datos
-	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), user)
+	var encryptedUser models.User = user
+	encryptedUser.Password = encryption.EncryptBase64(user.Password)
+
+	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), encryptedUser)
 	// si da un error
 	if err != nil {
 		// regresamos el error
@@ -100,7 +104,7 @@ func ModifyUser(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 	// modificamos el
 	result, err := config.Database.Collection("Users").
-		UpdateOne(context.TODO(), bson.D{{"_id", body.User.ID}}, bson.D{
+		UpdateOne(context.TODO(), bson.D{{"_id", body.User.Id}}, bson.D{
 			{"name", body.User.Name},
 			{"telephone", body.User.Telephone},
 			{"tags", body.User.Tags},
@@ -182,24 +186,5 @@ func DeleteUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   result,
-	})
-}
-
-// funcion de login
-// TODO crear una nueva funcion de login por que esta era dummie
-func Login(c *fiber.Ctx) error {
-	var body struct {
-		Telephone string `json:telephone`
-	}
-	c.BodyParser(&body)
-
-	result := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"telephone", body.Telephone}})
-
-	var user models.User
-	result.Decode(&user)
-
-	return c.JSON(fiber.Map{
-		"status": 200,
-		"result": user,
 	})
 }
