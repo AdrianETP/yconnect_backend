@@ -7,4 +7,5 @@ func SetAllRoutes(app *fiber.App) {
 	setOrgRoutes(app)
 	SetAuthRoutes(app)
 	SetForumRoutes(app)
+	setPostRoutes(app)
 }
