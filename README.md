@@ -13,7 +13,7 @@ Yconnect es una app de ios para conectar organizaciones con usuarios. Este repo 
 ## Routes
 Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
-### organizations
+### Organizations
 
 ```
 /organizations
@@ -198,4 +198,66 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```
 - Descripcion: iniciar sesion de un usuario
 
+### Posts
 
+```
+/posts
+```
+
+- tipo: GET
+- body: un objeto json con la organizacion
+- descripcion: obtiene todas los posts de una organizacion
+
+```json
+{
+    "orgId": "id de la organizacion"
+}
+```
+
+```
+/posts
+```
+
+- tipo: POST
+- body: nueva publicacion
+- descripcion: crea una nueva publicacion para una organizacion
+
+```json
+{
+    "orgId": "id de la organizacion",
+    "content": "text de la publicacion",
+    "media": [] // links de las imágenes o videos
+}
+```
+
+
+```
+/posts/addLike
+```
+
+- tipo: POST
+- body: id de la publicacion y el usuario
+- descripcion: agrega a usuario a la lista de likes de la publicacon
+
+```json
+{
+    "userId": "id del usuario",
+    "postId": "id de la publicacion"
+}
+```
+
+```
+/posts/addComment
+```
+
+- tipo: POST
+- body: id de la publicacion, el usuario, y el texto del comentario
+- descripcion: agrega comentario a una publicacion
+
+```json
+{
+    "userId": "id del usuario",
+    "postId": "id de la publicacion",
+    "content": "Hola mundo"
+}
+```

@@ -7,23 +7,22 @@ package models
 // }
 
 import (
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Post struct {
-	Id          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Publisher   primitive.ObjectID `json:"publisher" bson:"publisher"`
-	Caption     string             `json:"caption" bson:"caption"`
+	Id          primitive.ObjectID `bson:"_id, omniempty" json:id`
+	OrgId   primitive.ObjectID `bson:"orgId, omniempty" json:orgId`
+	Content     string             `bson:"content, omniempty" json:content`
 	Comments    []Comment          `json:"comments" bson:"comments"`
-	Likes       []primitive.ObjectID `json:"likes" bson:"likes"`
-	Media       []string           `json:"media" bson:"media"`
-	Timestamp   time.Time          `json:"timestamp" bson:"timestamp"`
+	Likes       []primitive.ObjectID `bson:"likes, omniempty" json:likes`
+	MediaUrls       []string           `bson:"media, omniempty" json:media`
+	TimeStamp   primitive.DateTime          `bson:"timestamp, omniempty" json:timestamp`
 }
 
 type Comment struct {
-	UserID    primitive.ObjectID `json:"user_id" bson:"user_id"`
-	Text      string             `json:"text" bson:"text"`
-	Timestamp time.Time          `json:"timestamp" bson:"timestamp"`
+	UserID    primitive.ObjectID `bson:"userId, omniempty" json:userId`
+	Content      string             `bson:"content, omniempty" json:content`
+	TimeStamp primitive.DateTime         `bson:"media, omniempty" json:media`
 }
