@@ -21,7 +21,13 @@ func AddForum(c *fiber.Ctx) error {
 	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", body.UserId}})
 
 	var user models.User
-	resU.Decode(&user)
+	err := resU.Decode(&user)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  "Error parsing user",
+		})
+	}
 
 	if user.Id.IsZero() {
 		return c.Status(400).JSON(fiber.Map{
