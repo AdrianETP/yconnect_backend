@@ -11,5 +11,5 @@ type Organization struct {
 	Igtag       string             `json:igtag`
 	IgUrl       string             `json:igurl`
 	Telephone   string             `json:telephone`
-	Email       string             `json:emaiL`
+	Email       string             `json:email`
 }
