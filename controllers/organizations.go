@@ -16,6 +16,8 @@ import (
 
 // funcion para crear una organizacion
 func CreateOrganization(c *fiber.Ctx) error {
+	// PENDIENTE: Cambiar de parsear directo a parsear , a parsar a una vaiable body que tenga el atributo organziation
+
 	// creacion de una organizacion en base al modelo
 	var Org models.Organization
 	// se le agrega un id de tipo id
@@ -111,6 +113,18 @@ func GetOrgByTag(c *fiber.Ctx) error {
 
 // funcion para obtener todas las organizaciones
 func GetAllOrgs(c *fiber.Ctx) error {
+	var body struct {
+		Token string `json:token`
+	}
+	c.BodyParser(&body)
+	token, tokenError := validateToken(body.Token)
+	if token == "" {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  tokenError,
+		})
+	}
+
 	// vamos a guardar los usuarios decodificados aqui
 	var organizations []models.Organization
 	// aqui vamos a llamar a mongo y decirle que encuentre a usuarios pero sin filtro ( osea que saque a todos los usuarios)

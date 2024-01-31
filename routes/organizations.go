@@ -8,7 +8,7 @@ import (
 // linkeamos un controller con una ruta (esta funcion se llama en el main del folder routes)
 func setOrgRoutes(app *fiber.App) {
 	app.Post("/organizations", controllers.CreateOrganization)
-	app.Get("/organizations", controllers.GetAllOrgs)
+	app.Post("/organizations/getAll", controllers.GetAllOrgs)
 	app.Post("/organizations/searchByTag", controllers.GetOrgByTag)
 	app.Post("/organizations/Favorites", controllers.GetFavorites)
 	app.Post("/organizations/SearchByName", controllers.GetOrgByName)

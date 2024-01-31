@@ -7,7 +7,7 @@ import (
 
 // linkeamos un controller con una ruta (esta funcion se llama en el main del folder routes)
 func setUserRoutes(app *fiber.App) {
-	app.Get("/users", controllers.GetAllUsers)
+	app.Post("/users/getAll", controllers.GetAllUsers)
 	app.Post("/users", controllers.AddUser)
 	app.Post("/users/addFavorites", controllers.AddtoFavorites)
 	app.Post("/users/addTags", controllers.AddTags)
