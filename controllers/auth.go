@@ -45,6 +45,8 @@ func validateToken(tokenString string) (string, error) {
 func Login(c *fiber.Ctx) error {
 	var userBody models.UserLogin
 	c.BodyParser(&userBody)
+	print(userBody.Email)
+	print(userBody.Password)
 
 	res := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"email", userBody.Email}})
 
@@ -56,10 +58,8 @@ func Login(c *fiber.Ctx) error {
 			"status": 400,
 			"error":  "no user found",
 		})
-
 	}
 	pass, err := encryption.DecryptBase64(user.Password)
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
@@ -79,5 +79,4 @@ func Login(c *fiber.Ctx) error {
 		"user":   user,
 		"token":  token,
 	})
-
 }
