@@ -54,13 +54,24 @@ func CreateOrganization(c *fiber.Ctx) error {
 // obtener la organizacion por tag
 func GetOrgByTag(c *fiber.Ctx) error {
 	// variable tags (puramente para parsear el body)
-	var Tag struct {
-		Tags []string `json:tags`
+	var body struct {
+		Tags  []string `json:tags`
+		Token string   `json:token`
 	}
 	// parseamos el body
-	c.BodyParser(&Tag)
+	c.BodyParser(&body)
+
+	// validamos el token
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+
 	// sacamos el array de tags
-	tags := Tag.Tags
+	tags := body.Tags
 
 	// coleccion de organizaciones
 	orgCol := config.Database.Collection("Organizations")
@@ -112,10 +123,19 @@ func GetOrgByTag(c *fiber.Ctx) error {
 
 func ChangeGrade(c *fiber.Ctx) error {
 	var body struct {
-		Grade string
-		OrgId primitive.ObjectID
+		Grade string             `json:grade`
+		OrgId primitive.ObjectID `json:org_id`
+		Token string             `json:token`
 	}
 	c.BodyParser(&body)
+
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
 
 	res := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
 
@@ -194,9 +214,19 @@ func GetFavorites(c *fiber.Ctx) error {
 	// hacemos una variable que simule el body y solo pida el user id
 	var body struct {
 		UserID primitive.ObjectID `json:userId`
+		token  string             `json:token`
 	}
 	// parseamos el body a esta variable
 	c.BodyParser(&body)
+
+	// validamos el token
+	_, err := validateToken(body.token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 401,
+			"error":  "invalid token",
+		})
+	}
 
 	// sacamos al usuario de la db
 	results := config.Database.Collection("Users").
@@ -242,10 +272,18 @@ func GetFavorites(c *fiber.Ctx) error {
 
 func GetOrgByName(c *fiber.Ctx) error {
 	var body struct {
-		Name string `json:name`
+		Name  string `json:name`
+		Token string `json:token`
 	}
 	c.BodyParser(&body)
 
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 	// lo que checa este query es que el nombre de la organizacion este en cualquier parte de la string (sin importar las mayusculas)
 	result, err := config.Database.Collection("Organizations").
 		Find(context.TODO(), bson.D{{"name", bson.D{{"$regex", primitive.Regex{Pattern: ".*" + body.Name + ".*", Options: "i"}}}}}) // el Options: i significa case insensitive
@@ -278,9 +316,19 @@ func DeleteOrg(c *fiber.Ctx) error {
 	// creamos una variable body para parsear el body de la request
 	var body struct {
 		OrgId primitive.ObjectID `json:orgId`
+		Token string             `json:token`
 	}
+
 	// parseamos el body en esa variable
 	c.BodyParser(&body)
+
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// borramos la organizacion en la base de datos
 	result, err := config.Database.Collection("Organizations").DeleteOne(context.TODO(), bson.D{
@@ -306,10 +354,19 @@ func GetOrgById(c *fiber.Ctx) error {
 	// creamos una variable body para parsear el body de la request
 	var body struct {
 		OrgId primitive.ObjectID `json:orgid`
+		Token string             `json:token`
 	}
 
 	// parseamos el body de la request
 	c.BodyParser(&body)
+
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// buscamos una organizacion con ese id
 	result := config.Database.Collection("Organizations").
@@ -331,9 +388,18 @@ func ModifyOrg(c *fiber.Ctx) error {
 	// variable para parsear el body
 	var body struct {
 		Organization models.Organization `json:organization`
+		Token        string              `json:token`
 	}
 	// parseamos a body
 	c.BodyParser(&body)
+
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// query para modificar la organizacion (la encuentra en base al id)
 	result, err := config.Database.Collection("Organizations").
@@ -368,10 +434,20 @@ func ModifyOrg(c *fiber.Ctx) error {
 // funcion para mandar un email de una organizacion que se quiera registrar
 func SendMail(c *fiber.Ctx) error {
 	// variable para parsear el body
-	var body models.Organization
+	var body struct {
+		Organization models.Organization `json:organization`
+		Token        string              `json:token`
+	}
 
 	// parseamos el body
 	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// creamos un nuevo mensaje
 	m := gomail.NewMessage()
@@ -394,12 +470,12 @@ func SendMail(c *fiber.Ctx) error {
 	m.SetBody("text/html", `<h1>new organization</h1>
         <p>una nueva organizacion ah solicitado  registrarse, estos son sus datos</p>
         <ul>
-            <li><b>name: </b>`+body.Name+`</li>
-            <li><b>description: </b>`+body.Description+`</li>
-            <li><b>telephone: </b>`+body.Telephone+`</li>
-            <li><b>location: </b>`+body.Location+`</li>
-            <li><b>email: </b>`+body.Email+`</li>
-            <li><b>igtag: </b>`+body.Igtag+`</li>
+            <li><b>name: </b>`+body.Organization.Name+`</li>
+            <li><b>description: </b>`+body.Organization.Description+`</li>
+            <li><b>telephone: </b>`+body.Organization.Telephone+`</li>
+            <li><b>location: </b>`+body.Organization.Location+`</li>
+            <li><b>email: </b>`+body.Organization.Email+`</li>
+            <li><b>igtag: </b>`+body.Organization.Igtag+`</li>
         </ul>`)
 
 	// Settings for SMTP server
