@@ -24,7 +24,6 @@ func CreateOrganization(c *fiber.Ctx) error {
 	err := c.BodyParser(&Org)
 	// si no se pudo efectuar
 	if err != nil {
-
 		// se regresa un error
 		return c.JSON(fiber.Map{
 			"status": 400,
@@ -106,6 +105,44 @@ func GetOrgByTag(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":        200,
 		"organizations": organizations,
+	})
+}
+
+func ChangeGrade(c *fiber.Ctx) error {
+	var body struct {
+		Grade string
+		OrgId primitive.ObjectID
+	}
+	c.BodyParser(&body)
+
+	res := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
+
+	var Organization models.Organization
+	res.Decode(&Organization)
+
+	if Organization.ID.IsZero() {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  "organization doesn't exist",
+		})
+	}
+
+	result, err := config.Database.Collection("Organizations").
+		UpdateOne(context.TODO(), bson.D{{"_id", Organization.ID}}, bson.D{
+			{"$set", bson.D{
+				{"grade", Organization.Grade},
+			}},
+		})
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 200,
+		"result": result,
 	})
 }
 
@@ -295,6 +332,7 @@ func ModifyOrg(c *fiber.Ctx) error {
 				{"igurrl", body.Organization.IgUrl},
 				{"description", body.Organization.Description},
 				{"email", body.Organization.Email},
+				{"grade", body.Organization.Grade},
 			}},
 		})
 		// si da un error

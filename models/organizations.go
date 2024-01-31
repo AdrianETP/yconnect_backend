@@ -12,4 +12,5 @@ type Organization struct {
 	IgUrl       string             `json:igurl`
 	Telephone   string             `json:telephone`
 	Email       string             `json:email`
+	Grade       int                `json:grade`
 }
