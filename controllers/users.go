@@ -14,14 +14,24 @@ import (
 // funcion para agregar un usuario
 func AddUser(c *fiber.Ctx) error {
 	// variable para parsear el body de la request
-	var user models.User
+	var body struct {
+		User  models.User `json:user`
+		Token string      `json:token`
+	}
 	// parseamos el body de la request
-	c.BodyParser(&user)
+	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 	// agregamos un id unico al usuario
-	user.Id = primitive.NewObjectID()
+	body.User.Id = primitive.NewObjectID()
 	// agregamos el usuario a la base de datos
-	var encryptedUser models.User = user
-	encryptedUser.Password = encryption.EncryptBase64(user.Password)
+	var encryptedUser models.User = body.User
+	encryptedUser.Password = encryption.EncryptBase64(body.User.Password)
 
 	result, err := config.Database.Collection("Users").InsertOne(context.TODO(), encryptedUser)
 	// si da un error
@@ -43,13 +53,24 @@ func AddUser(c *fiber.Ctx) error {
 // vamos a obtener a todos los usuarios en esta llamada get
 func GetAllUsers(c *fiber.Ctx) error {
 	// vamos a guardar los usuarios decodificados aqui
+	var body struct {
+		Token string `json:token`
+	}
+	c.BodyParser(&body)
+	_, tokenError := validateToken(body.Token)
+	if tokenError != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 	var users []models.User
 	// aqui vamos a llamar a mongo y decirle que encuentre a usuarios pero sin filtro ( osea que saque a todos los usuarios)
 	results, err := config.Database.Collection("Users").Find(context.TODO(), bson.M{})
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"status": 400,
-			"error":  err,
+			"error":  tokenError,
 		})
 	}
 	// aca vamos a iterar por todos los resultados y decodificarlos
@@ -71,10 +92,18 @@ func AddtoFavorites(c *fiber.Ctx) error {
 	var body struct {
 		UserID         primitive.ObjectID `json:user`
 		OrganizationID primitive.ObjectID `json:organization`
+		Token          string             `json:token`
 	}
 
 	// parseamos el body
 	c.BodyParser(&body)
+	_, tokenError := validateToken(body.Token)
+	if tokenError != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// agregamos el id de la organizacion a los favoritos del usuario
 	results, err := config.Database.Collection("Users").
@@ -98,10 +127,20 @@ func AddtoFavorites(c *fiber.Ctx) error {
 func ModifyUser(c *fiber.Ctx) error {
 	// variable para parsear el body
 	var body struct {
-		User models.User `json:user`
+		User  models.User `json:user`
+		Token string      `json:token`
 	}
+
 	// parseamos el body
 	c.BodyParser(&body)
+
+	_, tokenError := validateToken(body.Token)
+	if tokenError != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 	// modificamos el
 	result, err := config.Database.Collection("Users").
 		UpdateOne(context.TODO(), bson.D{{"_id", body.User.Id}}, bson.D{
@@ -134,10 +173,18 @@ func AddTags(c *fiber.Ctx) error {
 	var body struct {
 		UserId primitive.ObjectID `json:userid`
 		Tags   []string           `json:tags`
+		Token  string             `json:token`
 	}
 
 	// parseamos el body
 	c.BodyParser(&body)
+	_, tokenError := validateToken(body.Token)
+	if tokenError != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// iteramos por cada tag
 	for _, v := range body.Tags {
@@ -165,10 +212,19 @@ func DeleteUser(c *fiber.Ctx) error {
 	// variable para parsear el body
 	var body struct {
 		UserId primitive.ObjectID `json:userid`
+		Token  string             `json:token`
 	}
 
 	// parseamos el body
 	c.BodyParser(&body)
+
+	_, tokenError := validateToken(body.Token)
+	if tokenError != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// borramos el usuario
 	result, err := config.Database.Collection("Users").
