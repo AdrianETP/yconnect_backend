@@ -17,13 +17,13 @@ import (
 // funcion para crear una organizacion
 func CreateOrganization(c *fiber.Ctx) error {
 	// PENDIENTE: Cambiar de parsear directo a parsear , a parsar a una vaiable body que tenga el atributo organziation
-
+	var body struct {
+		Organization models.Organization `json:organization`
+		Token        string              `json:token`
+	}
 	// creacion de una organizacion en base al modelo
-	var Org models.Organization
-	// se le agrega un id de tipo id
-	Org.ID = primitive.NewObjectID()
 	// se le agrega a esta variable todo lo que se pueda encontrar en la request body
-	err := c.BodyParser(&Org)
+	err := c.BodyParser(&body)
 	// si no se pudo efectuar
 	if err != nil {
 		// se regresa un error
@@ -32,8 +32,24 @@ func CreateOrganization(c *fiber.Ctx) error {
 			"error":  err.Error(),
 		})
 	}
+	body.Organization.ID = primitive.NewObjectID()
+	_, tokenError := validateToken(body.Token)
+
+	if body.Organization.Name == "" {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  "Organization is required",
+		})
+	}
+
+	if tokenError != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  tokenError,
+		})
+	}
 	// insertar a la organizacion a la base de datos
-	result, error := config.Database.Collection("Organizations").InsertOne(context.TODO(), Org)
+	result, error := config.Database.Collection("Organizations").InsertOne(context.TODO(), body.Organization)
 
 	// si hubo un error
 	if error != nil {
