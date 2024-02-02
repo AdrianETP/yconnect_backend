@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"context"
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/adrianetp/yconnect_backend/config"
 	"github.com/adrianetp/yconnect_backend/models"
@@ -15,10 +15,22 @@ import (
 // funcion para agregar un publicacion
 func AddPost(c *fiber.Ctx) error {
 	// variable para parsear el body de la request
+	var body struct {
+		Post  models.Post `json:post`
+		Token string      `json:token`
+	}
 	var post models.Post
 	// parseamos el body de la request
 
-	c.BodyParser(&post)
+	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
+	post = body.Post
 
 	// guardamos todos los valores predeterminados
 	post.Id = primitive.NewObjectID()
@@ -42,7 +54,6 @@ func AddPost(c *fiber.Ctx) error {
 			"status": 400,
 			"error":  "Organization doesn't exist",
 		})
-
 	}
 
 	result, err := config.Database.Collection("Posts").InsertOne(context.TODO(), post)
@@ -66,9 +77,17 @@ func AddPost(c *fiber.Ctx) error {
 func GetPosts(c *fiber.Ctx) error {
 	var body struct {
 		OrgId primitive.ObjectID `json:orgId`
+		Token string             `json:token`
 	}
 
 	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// revissar que la organizacion existe
 	resO := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
@@ -84,7 +103,6 @@ func GetPosts(c *fiber.Ctx) error {
 		})
 	}
 	res, err := config.Database.Collection("Posts").Find(context.TODO(), bson.D{{"orgId", body.OrgId}})
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
@@ -99,10 +117,9 @@ func GetPosts(c *fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(fiber.Map{
 		"status": 200,
-		"posts": posts,
+		"posts":  posts,
 	})
 }
-
 
 // funcion para agregar likes a una publicacion
 func AddLike(c *fiber.Ctx) error {
@@ -110,11 +127,18 @@ func AddLike(c *fiber.Ctx) error {
 	var body struct {
 		UserID primitive.ObjectID `json:userId`
 		PostID primitive.ObjectID `json:postId`
+		Token  string             `json:token`
 	}
 
 	// parseamos el body
 	c.BodyParser(&body)
-
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// verificamos que el usuario existe
 	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", body.UserID}})
@@ -131,9 +155,7 @@ func AddLike(c *fiber.Ctx) error {
 
 	results, err := config.Database.Collection("Posts").
 		UpdateOne(context.TODO(), bson.D{{"_id", body.PostID}}, bson.D{{"$addToSet", bson.D{{"likes", body.UserID}}}})
-
-	// si el valor es nulo, haz que sea una lista con el id del usuario
-
+		// si el valor es nulo, haz que sea una lista con el id del usuario
 	if err != nil {
 		// regresamos el error
 		return c.JSON(fiber.Map{
@@ -152,22 +174,29 @@ func AddLike(c *fiber.Ctx) error {
 // funcion para agregar comentarios a una publicacion
 func AddComment(c *fiber.Ctx) error {
 	// variable para parsear el comment
-	var comment models.Comment
 
-	var postId struct {
-		PostId primitive.ObjectID `json:postId`
+	var body struct {
+		PostId  primitive.ObjectID `json:postId`
+		Comment models.Comment     `json:comment`
+		Token   string             `json:token`
 	}
 
 	// parseamos el body
-	c.BodyParser(&postId)
-	c.BodyParser(&comment)
+	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
-	comment.TimeStamp = primitive.NewDateTimeFromTime(time.Now())
+	body.Comment.TimeStamp = primitive.NewDateTimeFromTime(time.Now())
 
-	fmt.Println(postId)
-	fmt.Println(comment)
+	fmt.Println(body.PostId.String())
+	fmt.Println(body.Comment)
 
-	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", comment.UserID}})
+	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", body.Comment.UserID}})
 
 	var user models.User
 	resU.Decode(&user)
@@ -181,10 +210,8 @@ func AddComment(c *fiber.Ctx) error {
 
 	// agregamos el id de la organizacion a los favoritos del usuario
 	results, err := config.Database.Collection("Posts").
-		UpdateOne(context.TODO(), bson.D{{"_id", postId.PostId}}, bson.D{{"$push", bson.D{{"comments", comment}}}})
-
-	// si el valor es nulo, haz que sea una lista con el id del usuario
-
+		UpdateOne(context.TODO(), bson.D{{"_id", body.PostId}}, bson.D{{"$push", bson.D{{"comments", body.Comment}}}})
+		// si el valor es nulo, haz que sea una lista con el id del usuario
 	if err != nil {
 		// regresamos el error
 		return c.JSON(fiber.Map{

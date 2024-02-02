@@ -12,16 +12,26 @@ import (
 )
 
 func AddForum(c *fiber.Ctx) error {
-	var body models.Forums
-	body.Id = primitive.NewObjectID()
-	body.TimeStamp = primitive.NewDateTimeFromTime(time.Now())
+	var body struct {
+		Forum models.Forums `json:forum`
+		Token string        `json:token`
+	}
+	body.Forum.Id = primitive.NewObjectID()
+	body.Forum.TimeStamp = primitive.NewDateTimeFromTime(time.Now())
 	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 	// verificamos que el id del usuario y de la organizacion sean existentes
 	// usuario:
-	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", body.UserId}})
+	resU := config.Database.Collection("Users").FindOne(context.TODO(), bson.D{{"_id", body.Forum.UserId}})
 
 	var user models.User
-	err := resU.Decode(&user)
+	err = resU.Decode(&user)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
@@ -35,7 +45,7 @@ func AddForum(c *fiber.Ctx) error {
 			"error":  "user doesn't exist",
 		})
 	}
-	resO := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
+	resO := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.Forum.OrgId}})
 
 	var Org models.Organization
 
@@ -46,30 +56,34 @@ func AddForum(c *fiber.Ctx) error {
 			"status": 400,
 			"error":  "Organization doesn't exist",
 		})
-
 	}
 	res, err := config.Database.Collection("Forums").InsertOne(context.TODO(), body)
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
 			"error":  err.Error(),
 		})
-
 	}
 	return c.Status(200).JSON(fiber.Map{
 		"status": 200,
 		"data":   res,
 	})
-
 }
 
 func GetForumsFromOrg(c *fiber.Ctx) error {
 	var body struct {
 		OrgId primitive.ObjectID `json:orgId`
+		Token string             `json:token`
 	}
 
 	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	resO := config.Database.Collection("Organizations").FindOne(context.TODO(), bson.D{{"_id", body.OrgId}})
 
@@ -84,7 +98,6 @@ func GetForumsFromOrg(c *fiber.Ctx) error {
 		})
 	}
 	res, err := config.Database.Collection("Forums").Find(context.TODO(), bson.D{{"orgId", body.OrgId}})
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
@@ -104,11 +117,18 @@ func GetForumsFromOrg(c *fiber.Ctx) error {
 }
 
 func GetForumsByUser(c *fiber.Ctx) error {
-
 	var body struct {
 		UserId primitive.ObjectID `json:userId`
+		Token  string             `json:token`
 	}
 	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
 
 	// check if user id exists
 
@@ -126,13 +146,11 @@ func GetForumsByUser(c *fiber.Ctx) error {
 	}
 
 	res, err := config.Database.Collection("Forums").Find(context.TODO(), bson.D{{"userId", body.UserId}})
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
 			"error":  err.Error(),
 		})
-
 	}
 
 	var forums []models.Forums
