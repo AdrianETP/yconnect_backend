@@ -1,9 +1,8 @@
-# yconnect backen 
+# yconnect backend
 
 Yconnect es una app de ios para conectar organizaciones con usuarios. Este repo contiene el backend hecho en golang con el framework __fiber__ para todas las llamadas web
 
 ## Estructura
-- certs: los certificados (autosigned) de ssl
 - config: configuraciones de apis (en este caso la base de datos de mongodb)
 - models: los modelos para las bases de datos y para tipado estatico en el backend
 - controllers: las funciones a las que se va a llamar en el api
@@ -16,19 +15,35 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ### Organizations
 
 ```
-/organizations
+/organizations/GetAll
 ```
 
-- tipo: GET
-- body: nada
+- tipo: Post
+- body: 
+```json
+{
+    "token": "token del usuario"
+}
+``` 
 - descripcion: obtiene todas las organizaciones
+
+
 
 ```
 /organizations
 ```
 
 - tipo: POST
-- body: un objeto json cos la organizacion
+- body: 
+```json
+{
+    
+    "organization": objeto de la organizacion
+    "token": token del usuario
+
+}
+
+}`
 - descripcion: agrega una organizacion
 
 ```
@@ -40,7 +55,8 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
 ```json
 {
-  "tags": [] // los tags que quieras buscar
+    "tags": [] // los tags que quieras buscar
+    "token": "token del usuario"
 }
 ```
 
@@ -56,6 +72,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```json
 {
   "userId": "id del usuario"
+    "token": "token del usuario"
 }
 ```
 
@@ -70,6 +87,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```json
 {
     "name":"el nombre de la organizacion"
+"token": "token del usuario"
 }
 ```
 - descripcion: una manera de buscar organizaciones por nombre
@@ -84,6 +102,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```json
 {
     "orgid":"id de la organizacion"
+"token": "token del usuario"
 }
 ```
 - Descripcion: borrar una organizacion
@@ -97,6 +116,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```json
 {
     "orgid":"id de la organizacion"
+"token": "token del usuario
 }
 ```
 - Descripcion: Manera de buscar una organizacion por id
@@ -106,7 +126,13 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```
 
 - Tipo: POST
-- body: la organizacion entera
+- body: 
+```json
+{
+    "organization": objeto de la organizacion
+    "token": token del usuario
+}
+```
 - Descripcion: una manera de modificar una organizacion
 
 ```
@@ -114,18 +140,29 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```
 
 - Tipo: POST
-- body: La organizacion entera
+- body: 
+```json
+{
+    "organization": objeto de la organizacion
+    "token": token del usuario
+}
+```
 - Descripcion: le manda un mail al administrador de que una empresa se quiere registrar
 
 
 ### Users
 
 ```
-/users
+/users/getAll
 ```
 
-- metodo: GET
-- body: nada
+- metodo: POST
+- body: 
+```json 
+{
+    "token": "token del usuario"
+}
+```
 - descripcion: obtiene todos los usuarios
 
 ```
@@ -133,7 +170,13 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```
 
 - metodo: POST
-- body: el usuario que quieras agregar en JSON
+- body: 
+```json
+{
+    "user": objeto del usuario
+    "token": token del usuario
+}
+```
 - descripcion: agcega un usuario a la base de datos
 
 ```
@@ -147,6 +190,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 {
         "user":"el id del usuario"
         "organization":"el id de la organizacion"
+        "token": "token del usuario"
     }
 ```
 
@@ -161,6 +205,7 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 {
     "userid":"id del usuario"
     "tags":["tags que quieras agregar"]
+    "token": "token del usuario"
 }
 ```
 - Descripcion: agregar tags a un usuario
@@ -172,7 +217,8 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 - Body:
 ```json
     {
-        "userid":"id del usuario"
+        "userid":"id del usuario",
+        "token": "token del usuario"
     }
 ```
 - Descripcion: borrar un usuario
@@ -181,7 +227,13 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 /users/Update
 ```
 - Tipo: POST
-- Body:el usuario entero
+- Body:
+```json
+    {
+    "user":objeto del usuario
+    "token": "token del usuario"
+    }
+```
 - Descripcion: actualizar un usuario
 
 
@@ -192,7 +244,9 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 - Body:
 ```json
 {
-    "telephone":"el numero de telefono"
+    "email":"email del usuario",
+    "password":"password del usuario
+
 
 }
 ```
@@ -261,3 +315,4 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
     "content": "Hola mundo"
 }
 ```
+

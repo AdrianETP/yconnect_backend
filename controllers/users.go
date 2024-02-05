@@ -15,18 +15,10 @@ import (
 func AddUser(c *fiber.Ctx) error {
 	// variable para parsear el body de la request
 	var body struct {
-		User  models.User `json:user`
-		Token string      `json:token`
+		User models.User `json:user`
 	}
 	// parseamos el body de la request
 	c.BodyParser(&body)
-	_, err := validateToken(body.Token)
-	if err != nil {
-		return c.JSON(fiber.Map{
-			"status": 400,
-			"error":  "invalid token",
-		})
-	}
 	// agregamos un id unico al usuario
 	body.User.Id = primitive.NewObjectID()
 	// agregamos el usuario a la base de datos
