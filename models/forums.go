@@ -10,6 +10,7 @@ type Forums struct {
 	TimeStamp primitive.DateTime   `bson:"timestamp, omniempty" json:timestamp`
 	Likes     []primitive.ObjectID `bson:"likes, omniempty" json:likes`
 	Comments  []ForumComment       `json:"comments" bson:"comments"`
+	Title     string               `json:"title" bson:"title"`
 }
 
 type ForumComment struct {
