@@ -264,7 +264,8 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
 ```json
 {
-    "orgId": "id de la organizacion"
+    "orgId": "id de la organizacion",
+    "token": "auth token" 
 }
 ```
 
@@ -278,9 +279,12 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
 ```json
 {
-    "orgId": "id de la organizacion",
-    "content": "text de la publicacion",
-    "media": [] // links de las imágenes o videos
+    "post":{
+        "orgId": "id de la organizacion",
+        "content": "text de la publicacion",
+        "media": [] // links de las imágenes o videos
+    },
+    "token": "auth token"
 }
 ```
 
@@ -296,7 +300,8 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 ```json
 {
     "userId": "id del usuario",
-    "postId": "id de la publicacion"
+    "postId": "id de la publicacion",
+    "token": "auth token" 
 }
 ```
 
@@ -310,9 +315,12 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
 
 ```json
 {
-    "userId": "id del usuario",
     "postId": "id de la publicacion",
-    "content": "Hola mundo"
+    "comment": {
+        "userId": "id del usuario",
+        "content": "contenido del comentario"
+    }
+    "token": "auth token"
 }
 ```
 ### Foros
