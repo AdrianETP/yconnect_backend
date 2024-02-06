@@ -165,3 +165,96 @@ func GetForumsByUser(c *fiber.Ctx) error {
 		"forums": forums,
 	})
 }
+
+func AddForumComment(c *fiber.Ctx) error {
+	var body struct {
+		ForumComment models.ForumComment `json:forumComment`
+		Token        string              `json:token`
+	}
+	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
+	body.ForumComment.Id = primitive.NewObjectID()
+
+	res, resErr := config.Database.Collection("ForumComments").InsertOne(context.TODO(), body.ForumComment)
+	if resErr != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  resErr.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"status": 200,
+		"result": res,
+	})
+}
+
+func LikeForumComment(c *fiber.Ctx) error {
+	var body struct {
+		Token          string             `json:token`
+		ForumCommentId primitive.ObjectID `json:forumCommentId`
+	}
+
+	c.BodyParser(&body)
+
+	_, err := validateToken(body.Token)
+
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
+
+	res, err := config.Database.Collection("ForumComments").UpdateOne(context.TODO(), bson.D{{"_id", body.ForumCommentId}}, bson.D{{"$inc", bson.D{{"likes", 1}}}})
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"status": 200,
+		"result": res,
+	})
+}
+
+func GetCommentsFromForum(c *fiber.Ctx) error {
+	var body struct {
+		ForumId primitive.ObjectID `json:forumId`
+		Token   string             `json:token`
+	}
+	c.BodyParser(&body)
+	_, err := validateToken(body.Token)
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status": 400,
+			"error":  "invalid token",
+		})
+	}
+	res, err := config.Database.Collection("ForumComments").Find(context.TODO(), bson.D{{"forumId", body.ForumId}})
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": 400,
+			"error":  err.Error(),
+		})
+	}
+	var forumComments []models.ForumComment
+
+	for res.Next(context.TODO()) {
+		var forumComment models.ForumComment
+		res.Decode(&forumComment)
+		forumComments = append(forumComments, forumComment)
+	}
+	return c.Status(200).JSON(fiber.Map{
+		"status":        200,
+		"forumComments": forumComments,
+	})
+}

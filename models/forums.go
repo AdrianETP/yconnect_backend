@@ -9,4 +9,13 @@ type Forums struct {
 	Content   string               `bson:"content, omniempty" json:content`
 	TimeStamp primitive.DateTime   `bson:"timestamp, omniempty" json:timestamp`
 	Likes     []primitive.ObjectID `bson:"likes, omniempty" json:likes`
+	Comments  []ForumComment       `json:"comments" bson:"comments"`
+}
+
+type ForumComment struct {
+	Id        primitive.ObjectID   `bson:"_id, omniempty" json:id`
+	UserId    primitive.ObjectID   `bson:"userId, omniempty" json:userId`
+	Content   string               `bson:"content, omniempty" json:content`
+	TimeStamp primitive.DateTime   `bson:"timestamp, omniempty" json:timestamp`
+	Likes     []primitive.ObjectID `bson:"likes, omniempty" json:likes`
 }
