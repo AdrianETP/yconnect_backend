@@ -315,4 +315,88 @@ Aqui les dejo una lista con los paths disponibles hasta ahora y sus datos
     "content": "Hola mundo"
 }
 ```
+### Foros
+
+```
+/forums
+```
+- tipo : Post
+- body:
+```json
+{
+    "forum": objeto del foro
+    "token": token del usuario
+
+}
+```
+- descripcion: agrega un foro
+
+```
+/forums/GetFromOrg
+```
+
+- tipo: POST
+- body:
+```json
+{
+    "orgId": "id de la organizacion"
+    "token": token del usuario
+}
+```
+
+- descripcion: obtiene todos los foros de una organizacion
+
+
+```
+/forums/GetFromUser
+```
+- tipo: POST
+- body:
+```json
+{
+    "userId": "id del usuario"
+    "token": token del usuario
+}
+```
+- descripcion: obtiene todos los foros de un usuario
+
+```
+/forums/Comments
+```
+- tipo: POST
+- body:
+```json
+{
+    "forumComment": objeto del comentario
+    "token": token del usuario
+}
+```
+- descripcion: crea un comentario del foro
+
+```
+/forums/Comments/GetCommentsFromForum
+```
+- tipo: POST
+- body:
+```json
+{
+    "forumId": "id del foro"
+    "token": token del usuario
+}
+```
+- descripcion: obtiene todos los comentarios de un foro
+
+```
+/forums/Comments/Like
+```
+- tipo: POST
+- body:
+```json
+{
+    "forumCommentId": "id del comentario"
+    "token": token del usuario
+}
+```
+- descripcion: agrega un like al comentario
+
 
