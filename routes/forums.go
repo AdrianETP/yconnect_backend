@@ -10,6 +10,6 @@ func SetForumRoutes(app *fiber.App) {
 	app.Post("/forums/GetFromOrg", controllers.GetForumsFromOrg)
 	app.Post("/forums/GetFromUser", controllers.GetForumsByUser)
 	app.Post("/forums/Comments", controllers.AddForumComment)
-	app.Post("/forums/Comments/GetCommmentsFromPost", controllers.GetCommentsFromForum)
+	app.Post("/forums/Comments/GetCommmentsFromForum", controllers.GetCommentsFromForum)
 	app.Post("/forums/Comments/Like", controllers.LikeForumComment)
 }
