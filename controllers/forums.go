@@ -57,7 +57,7 @@ func AddForum(c *fiber.Ctx) error {
 			"error":  "Organization doesn't exist",
 		})
 	}
-	res, err := config.Database.Collection("Forums").InsertOne(context.TODO(), body)
+	res, err := config.Database.Collection("Forums").InsertOne(context.TODO(), body.Forum)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
@@ -173,7 +173,6 @@ func AddForumComment(c *fiber.Ctx) error {
 	}
 	c.BodyParser(&body)
 	_, err := validateToken(body.Token)
-
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"status": 400,
@@ -204,7 +203,6 @@ func LikeForumComment(c *fiber.Ctx) error {
 	c.BodyParser(&body)
 
 	_, err := validateToken(body.Token)
-
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"status": 400,
@@ -213,7 +211,6 @@ func LikeForumComment(c *fiber.Ctx) error {
 	}
 
 	res, err := config.Database.Collection("ForumComments").UpdateOne(context.TODO(), bson.D{{"_id", body.ForumCommentId}}, bson.D{{"$inc", bson.D{{"likes", 1}}}})
-
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
