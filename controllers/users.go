@@ -135,14 +135,14 @@ func ModifyUser(c *fiber.Ctx) error {
 	}
 	// modificamos el
 	result, err := config.Database.Collection("Users").
-		UpdateOne(context.TODO(), bson.D{{"_id", body.User.Id}}, bson.D{
+		UpdateOne(context.TODO(), bson.D{{"_id", body.User.Id}}, bson.D{{"$set", bson.D{
 			{"name", body.User.Name},
 			{"telephone", body.User.Telephone},
 			{"tags", body.User.Tags},
 			{"description", body.User.Description},
 			{"favorites", body.User.Favorites},
 			{"password", body.User.Password},
-		})
+		}}})
 		// si da un error
 	if err != nil {
 		// regresamos el error
